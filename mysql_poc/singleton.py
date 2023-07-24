@@ -1,5 +1,6 @@
 from MySQLdb import _mysql
 from threading import Lock, Thread
+import time
 
 
 class SingletonWithoutThread:
@@ -36,6 +37,8 @@ def without_thread():
     )
     print(db1 is db2)
     print(len(SingletonWithoutThread.singleton_conn))
+    time.sleep(10)
+    db1.close()
 
 
 class SingletonWithThread:
@@ -97,3 +100,5 @@ if __name__ == "__main__":
     without_thread()
     print("--------------------------")
     with_thread()
+    while True:
+        pass
