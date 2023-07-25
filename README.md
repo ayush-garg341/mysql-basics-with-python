@@ -34,6 +34,14 @@
     - In another terminal tab, open the docker mysql and run above commands.
 - Connection re-using
     - connection_reusing.py
+    - In connection reusing via pooling, we create a pool of 5 connections.
+    - We spawn 5 different threads with different sleep and then closing their respective db connection.
+    - Closing here means putting it back in the pool.
+    - We close 1st thread connection after 10 sec and hence available to the pool after 10 secs
+    - Now after 15 secs we spawn 6th thread and try to get a connection from the pool, we will get it as 1st thread has put the connection back to the pool.
+    - So this way we can re-use connection from pool. Useful when we have high throughput application and want to avoid connection creation overhead.
+    - Try to play with it by reducing and increasing sleep (close) and also to immediately get the 6th connection without sleep.
+    - Observe different kind of pool errors.
 - Transaction Isolation Levels
 - What happens with mysql connection when code breaks in between
     - If application is still up like a web server running then connection will be there in memory else will be lost.
