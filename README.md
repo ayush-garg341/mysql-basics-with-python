@@ -42,12 +42,27 @@
     - So this way we can re-use connection from pool. Useful when we have high throughput application and want to avoid connection creation overhead.
     - Try to play with it by reducing and increasing sleep (close) and also to immediately get the 6th connection without sleep.
     - Observe different kind of pool errors.
-- Transaction Isolation Levels
 - What happens with mysql connection when code breaks in between
     - If application is still up like a web server running then connection will be there in memory else will be lost.
-- Connection loading
-- MySql important config vars
-- Optmizations of config vars
+- Multiple threads sharing same mysql connection object and executing query on same connection.
+    - singleton_threaded.py
+    - In this file we have two function, with_thread and with_thread_sequential
+    - When we run with_thread function, both the threads execute query in paraller on same connection, but result in memory related errors and hence we can not run two queries in parallel on same connection.
+    - But when we run with_thread_sequential, it runs succesfully, since those threads are running queries one after the other ( not parallel ).
+    - It might also be internal library specific implementation, that we are observing this behaviour, although it might change for some other languages and libraries.
+    - Try running and playing with those functions.
+- Transaction Isolation Levels
 - Types of Indexing ..
 - Types of joins mysql support
+- Various types of aggregations mysql support
+- Common query optimizations
+- Stored Procedures
+- Master-Slave architecture
+- Log replication ( and its types i.e row based and statement based ) and syncing between master-slave
+- Data Partition
+- Sharding
+- Connection loading and checking memory
+- MySql important config vars
+- Optmizations of config vars
 - Data types mysql support ..
+- Common data structure mysql uses ..
