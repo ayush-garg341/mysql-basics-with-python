@@ -20,4 +20,9 @@ G1a: Aborted Reads (dirty reads, cascaded aborts)
 - Read Committed
     - When reading from db, you will only see data that has been committed. ( No dirty reads )
     - When writing to the db, you will only overwrite data that has been committed. ( No dirty writes )
+    - This level allows transactions to see only committed changes made by other transactions.
+    - In this we notice that thread2 does not get row id 1 result. Why ?
+        - Becuase that row is locked by another Transaction T1.
+    - When we see row id 3 in T1, it means that T2 has already been committed. To make sure this is happening, we can add a rollback in T2 and check if that still happening.
+        - When we rollback in T2, no changes are reflected in T1 and main thread.
 - Snapshot Isolation
