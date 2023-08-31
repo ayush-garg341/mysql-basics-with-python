@@ -68,12 +68,14 @@ if __name__ == "__main__":
         cursor.execute("""Show databases;""")
         print(cursor.fetchall())
         cursor.execute("use test;")
+        cursor.execute("""select @@transaction_ISOLATION;""")
+        print(cursor.fetchall())
         cursor.execute(
             """create table test (id int primary key, value int) engine=innodb;"""
         )
+        cursor.execute("""begin;""")
         cursor.execute("""insert into test (id, value) values (1, 10), (2, 20);""")
-        cursor.execute("""select @@transaction_ISOLATION;""")
-        print(cursor.fetchall())
+        cursor.execute("commit;")
         thread1 = Thread(
             target=thread_1,
             args=(cnx1,),

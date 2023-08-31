@@ -2,6 +2,8 @@ Isolation Levels
 G0: Write Cycles (dirty writes)
 G1a: Aborted Reads (dirty reads, cascaded aborts)
 Remember:-  A transaction can typically see its own changes before it commits. In most relational database systems, the changes made within a transaction are immediately visible to that transaction itself, even before the transaction is committed.
+- By default transaction set is repeatable read in this mysql.
+- Insert that we are performing in main block are also in repeatable read isolation level. So we need to commit those inserts before being visible to other transactions (read committed). But read uncommitted transaction can see uncommitted changes.
 - Read Uncommitted
     - A transaction can see changes to data made by other transactions that are not committed yet.
     - With this isolation level, there is always chance of getting a “Dirty-Read”.
@@ -23,8 +25,6 @@ Remember:-  A transaction can typically see its own changes before it commits. I
     - When reading from db, you will only see data that has been committed. ( No dirty reads )
     - When writing to the db, you will only overwrite data that has been committed. ( No dirty writes )
     - This level allows transactions to see only committed changes made by other transactions.
-    - In this we notice that thread2 does not get row id 1 result. Why ?
-        - Becuase that row is locked by another Transaction T1.
     - When we see row id 3 in T1, it means that T2 has already been committed. To make sure this is happening, we can add a rollback in T2 and check if that still happening.
         - When we rollback in T2, no changes are reflected in T1 and main thread.
     - In this isolation level, you can only read committed changes made by other transactions. If a row is locked by another transaction, attempting to select that row will either block until the lock is released or return after a timeout, depending on the database system's configuration.
@@ -64,5 +64,10 @@ Remember:-  A transaction can typically see its own changes before it commits. I
         - Lock Release:- Once Transaction A releases the shared lock (typically by committing or rolling back the transaction), Transaction B is unblocked and can proceed to access the row.
     - If you're experiencing situations where Transaction B is blocked and not returning any data, it's likely because the row it's trying to access is currently locked by Transaction.
     - Once Transaction A releases the lock, Transaction B should be able to access the row and retrieve the data.
+    - Here's how it typically works:-
+        - Write Visibility: When a transaction in the "Repeatable Read" isolation level performs updates, inserts, or deletes, those changes are made within the context of the transaction itself. Other transactions running concurrently will not see these changes until the modifying transaction is committed.
+        - Reads Within the Same Transaction: If the modifying transaction performs a read after making changes, it will see the updated data as part of its consistent view. This is because the transaction itself maintains a consistent snapshot of the data it has seen, and its own changes are included in that snapshot.
+        - Visibility to Other Transactions: Other transactions running concurrently in "Repeatable Read" isolation level will not see the changes made by the modifying transaction until it is committed. They will continue to see the data as it existed at the start of their own transactions.
 - Serializable Isolation
+    - 
 
