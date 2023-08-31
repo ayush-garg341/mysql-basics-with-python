@@ -44,8 +44,10 @@ def thread_2(conn):
 
         cursor_t2.execute("UPDATE test SET value = 12 WHERE id = 1;")
         cursor_t2.execute("""insert into test (id, value) values (3, 40);""")
-        # cursor_t2.execute("commit;")
-        cursor_t2.execute("""rollback;""")
+        cursor_t2.execute("SELECT * from test;")
+        print("thread 2 -- ", cursor_t2.fetchall())
+        cursor_t2.execute("commit;")
+        # cursor_t2.execute("""rollback;""")
 
 
 if __name__ == "__main__":
@@ -88,6 +90,8 @@ if __name__ == "__main__":
         thread2.start()
         thread1.join()
         thread2.join()
+        cursor.execute("""select @@transaction_ISOLATION;""")
+        print(cursor.fetchall())
         cursor.execute("SELECT * FROM test;")
         print("Main thread --- ", cursor.fetchall())
         cursor.execute("drop table test;")

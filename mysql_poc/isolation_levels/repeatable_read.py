@@ -132,6 +132,8 @@ if __name__ == "__main__":
         thread2.join()
         thread3.join()
         thread4.join()
+        cursor.execute("""select @@transaction_ISOLATION;""")
+        print(cursor.fetchall())
         cursor.execute("SELECT * FROM test;")
         print("Main thread --- ", cursor.fetchall())
         cursor.execute("drop table test;")
