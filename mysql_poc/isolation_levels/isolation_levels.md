@@ -6,7 +6,7 @@ Remember:-  A transaction can typically see its own changes before it commits. I
 - Insert that we are performing in main block are also in repeatable read isolation level. So we need to commit those inserts before being visible to other transactions (read committed). But read uncommitted transaction can see uncommitted changes.
 
 - The release of locks in a transaction depends on whether the transaction completes (either by committing or rolling back) and the isolation level being used.
-    - Read Committed and Repeatable Read:- Locks acquired by a transaction are typically released when the query completes, not necessarily when the transaction is committed. This means that once a query within the transaction is finished, the locks held by that query are released, potentially allowing other queries or transactions to access the locked data.
+    - Read Committed and Repeatable Read:- Locks acquired by a transaction are typically released when the query completes, not necessarily when the transaction is committed. This means that once a query within the transaction is finished, the locks held by that query are released, potentially allowing other queries or transactions to access the locked data. ( Alternate print statements in read_committed.py )
     - Serializable: In the "Serializable" isolation level, locks are often held until the transaction is committed. This provides the highest level of isolation and ensures that the locked data remains consistent throughout the entire transaction.
 
 - Read Uncommitted
