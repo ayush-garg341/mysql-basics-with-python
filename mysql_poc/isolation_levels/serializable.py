@@ -75,6 +75,7 @@ if __name__ == "__main__":
         cursor.execute("""select @@transaction_ISOLATION;""")
         print(cursor.fetchall())
         cursor.execute("""set session transaction isolation level serializable;""")
+        cursoe.execute("""DROP TABLE test IF EXISTS;""")
         cursor.execute(
             """create table test (id int primary key, value int) engine=innodb;"""
         )

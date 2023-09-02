@@ -68,6 +68,7 @@ if __name__ == "__main__":
         cursor.execute("""Show databases;""")
         print(cursor.fetchall())
         cursor.execute("use test;")
+        cursoe.execute("""DROP TABLE test IF EXISTS;""")
         cursor.execute(
             """create table test (id int primary key, value int) engine=innodb;"""
         )

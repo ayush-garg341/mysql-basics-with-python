@@ -72,6 +72,7 @@ if __name__ == "__main__":
         cursor.execute("use test;")
         cursor.execute("""select @@transaction_ISOLATION;""")
         print(cursor.fetchall())
+        cursoe.execute("""DROP TABLE test IF EXISTS;""")
         cursor.execute(
             """create table test (id int primary key, value int) engine=innodb;"""
         )
