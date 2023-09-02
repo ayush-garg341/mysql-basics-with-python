@@ -16,68 +16,40 @@ class ConnectionReusing:
 def thread_1(conn):
     with conn.cursor() as cursor:
         cursor.execute(
-            """set session transaction isolation level repeatable read;"""
+            """set session transaction isolation level serializable;"""
         )  # ----T1
         cursor.execute("SELECT * FROM test;")
         print("thread 1 --- ", cursor.fetchall())
 
         cursor.execute(
-            "commit;"
-        )  # try commenting this line and check the output in the main thread. ( transaction in this connection is not committed and during whole txn there will be repeatable reads )
+            """begin;"""
+        )  # move this line before first select (line 20) and we will experience a deadlock
+        cursor.execute("UPDATE test SET value = 11 WHERE id = 1;")
+
+        cursor.execute("SELECT * FROM test;")
+        print("thread 1 --- ", cursor.fetchall())
+
+        cursor.execute("UPDATE test SET value = 21 WHERE id = 2;")
+        cusror.execute("insert into test (id, value) values (4, 40);")
+        cursor.execute("commit;")
 
 
 def thread_2(conn):
     # start transaction T2
     with conn.cursor() as cursor_t2:
         cursor_t2.execute(
-            """set session transaction isolation level read committed;"""
+            """set session transaction isolation level serializable;"""
         )  # ----T2
 
         cursor_t2.execute("""begin;""")
-        cursor_t2.execute("SELECT * from test;")
+        cursor_t2.execute("SELECT * from test where id = 1;")
         print("thread 2 -- ", cursor_t2.fetchall())
 
         cursor_t2.execute("UPDATE test SET value = 12 WHERE id = 1;")
         cursor_t2.execute("""insert into test (id, value) values (3, 40);""")
-        cursor_t2.execute("SELECT * from test")
+        cursor_t2.execute("SELECT * from test;")
         print("thread 2 -- ", cursor_t2.fetchall())
-        cursor_t2.execute("commit;")
-        print("thread 2 committed")
-
-
-def thread_3(conn):
-    with conn.cursor() as cursor_t3:
-        cursor_t3.execute(
-            """set session transaction isolation level read committed;"""
-        )  # ----T2
-
-        cursor_t3.execute("""begin;""")
-
-        cursor_t3.execute("SELECT * from test")
-        print("thread 3 -- ", cursor_t3.fetchall())
-        cursor_t3.execute("UPDATE test SET value = 22 WHERE id = 2;")
-        cursor_t3.execute("""insert into test (id, value) values (4, 50);""")
-        cursor_t3.execute("SELECT * from test")
-        print("thread 3 -- ", cursor_t3.fetchall())
-        cursor_t3.execute("commit;")
-        print("thread 3 committed")
-
-
-def thread_4(conn):
-    with conn.cursor() as cursor_t4:
-        cursor_t4.execute(
-            """set session transaction isolation level read committed;"""
-        )  # ----T2
-
-        cursor_t4.execute("""begin;""")
-
-        cursor_t4.execute("SELECT * from test")
-        print("thread 4 -- ", cursor_t4.fetchall())
-        cursor_t4.execute("""insert into test (id, value) values (5, 60);""")
-        cursor_t4.execute("SELECT * from test")
-        print("thread 4 -- ", cursor_t4.fetchall())
-        cursor_t4.execute("commit;")
-        print("thread 4 committed")
+        # cursor_t2.execute("commit;")
 
 
 if __name__ == "__main__":
@@ -96,14 +68,13 @@ if __name__ == "__main__":
 
         cnx1 = connection_pool.get_connection()
         cnx2 = connection_pool.get_connection()
-        cnx3 = connection_pool.get_connection()
-        cnx4 = connection_pool.get_connection()
         cursor = cnx1.cursor()
         cursor.execute("""Show databases;""")
         print(cursor.fetchall())
         cursor.execute("use test;")
         cursor.execute("""select @@transaction_ISOLATION;""")
         print(cursor.fetchall())
+        cursor.execute("""set session transaction isolation level serializable;""")
         cursor.execute(
             """create table test (id int primary key, value int) engine=innodb;"""
         )
@@ -118,24 +89,10 @@ if __name__ == "__main__":
             target=thread_2,
             args=(cnx2,),
         )
-        thread3 = Thread(
-            target=thread_3,
-            args=(cnx3,),
-        )
-        thread4 = Thread(
-            target=thread_4,
-            args=(cnx4,),
-        )
-        thread1.start()
         thread2.start()
-        thread3.start()
-        thread4.start()
-        thread1.join()
+        thread1.start()
         thread2.join()
-        thread3.join()
-        thread4.join()
-        cursor.execute("""select @@transaction_ISOLATION;""")
-        print(cursor.fetchall())
+        thread1.join()
         cursor.execute("SELECT * FROM test;")
         print("Main thread --- ", cursor.fetchall())
         cursor.execute("drop table test;")

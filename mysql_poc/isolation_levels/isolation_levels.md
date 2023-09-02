@@ -73,6 +73,51 @@ Remember:-  A transaction can typically see its own changes before it commits. I
         - Write Visibility: When a transaction in the "Repeatable Read" isolation level performs updates, inserts, or deletes, those changes are made within the context of the transaction itself. Other transactions running concurrently will not see these changes until the modifying transaction is committed.
         - Reads Within the Same Transaction: If the modifying transaction performs a read after making changes, it will see the updated data as part of its consistent view. This is because the transaction itself maintains a consistent snapshot of the data it has seen, and its own changes are included in that snapshot.
         - Visibility to Other Transactions: Other transactions running concurrently in "Repeatable Read" isolation level will not see the changes made by the modifying transaction until it is committed. They will continue to see the data as it existed at the start of their own transactions.
-- Serializable Isolation
-    - 
 
+- Lost Updates
+    - When two concurrent transactions increment the same value.
+    - The lost update problem occur if an application reads some value from the db, modifies it and writes back the modified value. ( Read-modify-write cycle )
+    - If two transactions do this concurrently, one of the modifications can be lost, because the second write does not include the first modification.
+    - Solutions:-
+        - Atomic Write Operations:
+            - Many db provide atomic update ops, which remove the need to implement read-modify-write cycle in application code.
+                - Update counters set value = value + 1 where key = 'foo';
+            - Atomic ops are usually implemented by taking an **exclusive** lock on the object when it is read so that no other transaction can read it until the update has been applied.
+            - This technique is known as cursor ability.
+        - Explicit Locking
+            - If db's built in atomic ops do not provide necessary functionality then application have to explicitly lock objects that are going to be updated.
+                - BEGIN TRANSACTION;
+                - SELECT * from table_name where key="foo" FOR UPDATE;
+                - COMMIT;
+            - The FOR UPDATE clause indicates that db should take a lock on all rows returned by this query.
+        - Compare and set
+            - The purpose of this ops is to avoid lost updates by allowing an update to happen only if the value has not changed since you last read it.
+                - UPDATE wiki_pages SET content = 'new content' WHERE id = 1234 and content = 'old content';
+            - If db allows WHERE clause to read from an old snapshot, this statement may not prevent lost updates, because condition may be true even though another concurrent write is occuring.
+
+- Write Skew and phantoms
+    - Let's take an example of write skew.
+    - Writing an example for doctors to manage their on-call shifts at a hospital.
+    - Important to have atleast one doctor on call at any time.
+    - Doctors can themselves be sick and apply for leave, but one doctor must be on call.
+    - ![Alt text](write_skew.jpg "Write Skew")
+    - The example in above image is neither a dirty write nor a lost update, because two transactions are updating two different objects. ( Race condition )
+    - Write skew is a generalization of lost update problem.
+    - Either use a serializable isolation level or the second best option is to explicit lock the rows.
+        - BEGIN TRANSACTION;
+            - SELECT * FROM doctors where on_call = true and shift_id = 1234 for update;
+            - Update doctors set on_call = false where name = 'Alice' and shift_id = 1234;
+        - COMMIT;
+    - In cases where select query returns nothing, SELECT FOR UPDATE can't attach locks to anything.
+        - This effect, where a write in one transaction changes the results of a search query in another transaction, is called a phantom.
+        - If the problem of phantoms is that there is no object to which we can attach the locks, perhaps we can artificially introduce a lock object into the db. ( Materializing Conflicts )
+
+- Serializable Isolation
+    - Strongest Isolation Level
+    - It guarantees that even though txns may execute in parallel, the end result is the same as if they had executed one at a time, serially without any concurrency.
+    - Avoid the coordination overhead of locking.
+    - Systems with single threaded serial trnsaction processing don;t allow interactive multi-statement transactions. Instead, application must submit the entire transaction code to the db ahead of time, as a stored procedure. Provided that data required by txn is in memory, stored procedure can execute very fast, without waiting for any network IO or disk IO.
+    - When we run serializable.py file, we will notice that thread1 not able to insert (gives timeout) as thread2 starts first and run upto completion but do not commit, which blocks thread1 to proceed and hence we get lock timeout error.
+    - There might occur deadlock as well, if you see the code carefully, both threads reading same object and trying to update the same object by taking lock.
+    - Read Locks: In "Serializable" isolation, when a transaction reads a row of data, it typically acquires a read lock on that row. This read lock prevents other transactions from acquiring exclusive (write) locks on the same row, effectively blocking any modifications to the data.
+    - Write Locks: When a transaction modifies a row (e.g., with an INSERT, UPDATE, or DELETE), it acquires an **exclusive** lock on that row. **This exclusive lock prevents other transactions from reading or modifying the locked row until the modifying transaction is completed**.

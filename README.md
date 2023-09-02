@@ -57,6 +57,8 @@
 - Various types of aggregations mysql support
 - Common query optimizations
 - Stored Procedures
+- Triggers
+- Case study of payment systems -> Make sure that payment is done correctly without race condition if there are multiple transactions going on for payment.
 - Master-Slave architecture
 - Log replication ( and its types i.e row based and statement based ) and syncing between master-slave
 - Data Partition
