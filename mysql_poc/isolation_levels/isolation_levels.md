@@ -121,3 +121,8 @@ Remember:-  A transaction can typically see its own changes before it commits. I
     - There might occur deadlock as well, if you see the code carefully, both threads reading same object and trying to update the same object by taking lock.
     - Read Locks: In "Serializable" isolation, when a transaction reads a row of data, it typically acquires a read lock on that row. This read lock prevents other transactions from acquiring exclusive (write) locks on the same row, effectively blocking any modifications to the data.
     - Write Locks: When a transaction modifies a row (e.g., with an INSERT, UPDATE, or DELETE), it acquires an **exclusive** lock on that row. **This exclusive lock prevents other transactions from reading or modifying the locked row until the modifying transaction is completed**.
+
+
+NOTE:-
+    - **Shared Locks**: When a transaction acquires a shared lock on an object, it is essentially declaring its intention to read the object. Multiple transactions can simultaneously acquire shared locks on the same object.
+    - **Exclusive Locks**: Exclusive locks (also known as write locks) are not compatible with shared locks. If one transaction holds an exclusive lock on an object, no other transaction can acquire an exclusive or shared lock on the same object until the exclusive lock is released.
