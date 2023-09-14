@@ -52,10 +52,10 @@
     - It might also be internal library specific implementation, that we are observing this behaviour, although it might change for some other languages and libraries.
     - Try running and playing with those functions.
 - Transaction Isolation Levels
-- Types of Indexing ..
 - Types of joins mysql support
+- Types of Indexing (dave pinale)..
+- Common query optimizations (dave pinale)
 - Various types of aggregations mysql support
-- Common query optimizations
 - Stored Procedures
 - Triggers
 - Case study of payment systems -> Make sure that payment is done correctly without race condition if there are multiple transactions going on for payment.
