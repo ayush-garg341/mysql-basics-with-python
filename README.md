@@ -53,8 +53,10 @@
     - Try running and playing with those functions.
 - Transaction Isolation Levels
 - Types of joins mysql support
-- Types of Indexing (dave pinale)..
-- Common query optimizations (dave pinale)
+- Types of Indexing..
+- Common query optimizations..
+- MySql important config vars ( connection related )
+- Optmizations of config vars
 - Various types of aggregations mysql support
 - Stored Procedures
 - Triggers
@@ -64,7 +66,5 @@
 - Data Partition
 - Sharding
 - Connection loading and checking memory
-- MySql important config vars
-- Optmizations of config vars
 - Data types mysql support ..
 - Common data structure mysql uses ..
